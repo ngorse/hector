@@ -1,0 +1,7 @@
+# Purpose
+
+Chatbot
+
+# Dependencies
+
+Ollama 
