@@ -46,7 +46,6 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def get_bot_response():
-    print("POST!")
     userText = request.json.get('msg')
     return get_answer(userText)
 
