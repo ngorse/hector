@@ -1,225 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <title>Hector</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GenAI-Bot</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-    
-        /* Body Styling */
-        body, html {
-            height: 100%;
-            width: 100%;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #1a1c23; /* 40% lighter than #121212 */
-            margin: 0;
-        }
-    
-        /* Chat Container */
-        .chat-container {
-            background: #2b2d42; /* 40% lighter than #1e1e1e */
-            width: 80%;
-            max-width: 800px;
-            height: 80%;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-    
-        /* Header */
-        .chat-header {
-            background: #1c69b2; /* 40% lighter than #1c69b2 */
-            color: #ffffff;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-    
-        /* Chatbox Styling */
-        #chatbox {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            background-color: #2b2b2b; /* 40% lighter than #121212 */
-            color: #e0e0e0;
-        }
-    
-        .spacer {
-            background-color: #2b2b2b; /* 40% lighter than #121212 */
-            color: #e0e0e0;
-        }
-
-        /* Messages */
-        .userText, .botText {
-            max-width: 70%;
-            margin-bottom: 10px;
-            line-height: 1.5;
-            font-size: 0.9rem;
-            word-wrap: break-word;
-        }
-    
-        .userText {
-            align-self: flex-end;
-        }
-    
-        .userText span {
-            background-color: #5a5a5a; /* 40% lighter than #4a4a4a */
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-    
-        .botText {
-            align-self: flex-start;
-        }
-    
-        .botText span {
-            background-color: #1c69b2; /* 40% lighter than #1c69b2 */
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-    
-        /* Input Area */
-        .input-container {
-            display: flex;
-            padding: 10px;
-            background: #3a3a3a; /* 40% lighter than #1e1e1e */
-            border-top: 1px solid #555555; /* Adjusted for lighter contrast */
-        }
-    
-        #textInput {
-            flex: 1;
-            border: 1px solid #888888; /* 40% lighter than #555555 */
-            border-radius: 20px;
-            padding: 10px;
-            font-size: 1rem;
-            outline: none;
-            margin-right: 10px;
-            background-color: #4a4a4a; /* 40% lighter than #2a2a2a */
-            color: #e0e0e0;
-        }
-    
-        #textInput:focus {
-            border-color: #1c69b2; /* 40% lighter than #1c69b2 */
-            box-shadow: 0 0 5px rgba(51, 147, 240, 0.5); /* Adjusted glow */
-        }
-    
-        button {
-            background: #1c69b2; /* 40% lighter than #1c69b2 */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-    
-        button:hover {
-            background: #3c89d2; /* 40% lighter than #155485 */
-        }
-    
-        button:disabled {
-            background-color: #888888; /* 40% lighter than #555555 */
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-    
-        /* Scrollbar Styling */
-        #chatbox::-webkit-scrollbar {
-            width: 5px;
-        }
-    
-        #chatbox::-webkit-scrollbar-thumb {
-            background: #888888; /* 40% lighter than #555555 */
-            border-radius: 10px;
-        }
-    
-        #chatbox::-webkit-scrollbar-thumb:hover {
-            background: #aaaaaa; /* 40% lighter than #777777 */
-        }
-    
-        #wheel {
-            display: flex;
-            background-color: transparent;
-            position: absolute;
-            z-index: 1;
-        }
-    </style>
-    
+    <script src="{{url_for('static', filename='script.js')}}"></script>
+    <link rel= "stylesheet" type= "text/css" href="{{ url_for('static', filename='styles.css')}}">    
 </head>
+
 <body>
     <div class="chat-container">
+
         <div class="chat-header">Hector</div>
+        <div id="idle" class="wheel">
+            <img id=hamster width="64px" height="64px" src="{{url_for('static', filename='idle.gif')}}" />
+        </div>
+        <div id="running" class="wheel" style="display: none">
+            <img id=hamster width="64px" height="64px" src="{{url_for('static', filename='running.gif')}}" />
+        </div>
+
         <div class="spacer">&nbsp</div>
+
         <div id="chatbox">
             <p class="botText">
                 <span>How may I help you today?</span>
             </p>
         </div>
+
         <div class="spacer">&nbsp</div>
+
         <div class="input-container">
             <input id="textInput" type="text" placeholder="Type your message here..." />
             <button id=sendButton onclick="getBotResponse() ">Send</button>
         </div>
+
+    
     </div>
-    <div id="wheel" style="display:none;">
-        <img src="{{url_for('static', filename='spinner.gif')}}" />
-    </div>
-    <script>
-        function toggleWaitIndicators() {
-            var button = document.getElementById("sendButton");
-            button.disabled = !button.disabled;
-            var wheel = document.getElementById("wheel");
-            wheel.style.display = (wheel.style.display === 'none') ? 'block' : 'none';
-        }
 
-        function refreshText() {
-            document
-               .getElementById("textInput")
-               .scrollIntoView({ block: "start", behavior: "smooth" });
-            var div = document.getElementById("chatbox");
-            div.scrollTop = div.scrollHeight;
-            toggleWaitIndicators();
-        }
-
-        function getBotResponse() {
-            if ($("#textInput").val().length == 0) {
-                return;
-            }
-            var rawText = $("#textInput").val();
-            var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
-            $("#textInput").val("");
-            $("#chatbox").append(userHtml);
-            refreshText();
-            $.get("/get", { msg: rawText }).done(function (data) {
-                var botHtml = '<p class="botText"><span>' + data + "</span></p>";
-                $("#chatbox").append(botHtml);
-                refreshText();
-            });
-        }
-
-        $("#textInput").keypress(function (e) {
-            if (e.which == 13) {
-                getBotResponse();
-            }
-        });
-  </script>
 </body>
 </html>
