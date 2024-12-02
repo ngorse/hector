@@ -30,8 +30,10 @@
             });
         }
 
-        $("#textInput").keypress(function (e) {
-            if (e.which == 13) {
-                getBotResponse();
-            }
+        $(document).ready(function() {
+            $("#textInput").keypress(function (e) {
+                if (e.which == 13) {
+                    getBotResponse();
+                }
+            });
         });
