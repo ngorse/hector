@@ -1,0 +1,31 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./services/nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./services/certbot/www:/var/www/certbot/:ro
+      - ./services/certbot/conf/:/etc/nginx/ssl/:ro
+
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5555:5555
+    environment:
+      FLASK_APP: app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 5555
+      FLASK_ENV: development
+    networks:
+      - default
+
+#  certbot:
+#    image: certbot/certbot:latest
+#    volumes:
+#      - ./services/certbot/www/:/var/www/certbot/:rw
+#      - ./services/certbot/conf/:/etc/letsencrypt/:rw

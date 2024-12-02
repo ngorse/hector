@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
-URL = "http://localhost:11434/api/chat"
+URL = "http://host.docker.internal:11434/api/chat"
 MESSAGES = []
 
 
