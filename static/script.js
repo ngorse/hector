@@ -15,18 +15,31 @@
         }
 
         function getBotResponse() {
-            if ($("#textInput").val().length == 0) {
+            message = $("#textInput").val().trim();
+            if (!message) {
                 return;
             }
-            var rawText = $("#textInput").val();
-            var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
+
+            var userHtml = '<p class="userText"><span>' + message + "</span></p>";
             $("#textInput").val("");
             $("#chatbox").append(userHtml);
             refreshText();
-            $.get("/get", { msg: rawText }).done(function (data) {
-                var botHtml = '<p class="botText"><span>' + data + "</span></p>";
+
+            const data = { msg: message };
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                var botHtml = '<p class="botText"><span>' + data.response + "</span></p>";
                 $("#chatbox").append(botHtml);
                 refreshText();
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         }
 
