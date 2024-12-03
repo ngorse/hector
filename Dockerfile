@@ -18,6 +18,11 @@ ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5555
 ENV FLASK_ENV=development
+ENV FLASK_DEBUG=True
+ENV LLM_PROTOCOL=http
+ENV LLM_HOST=host.docker.internal
+ENV LLM_PORT=11434
+ENV LLM_MODEL=llama3.2
 
 # Run the Flask application
 CMD ["flask", "run"]

@@ -20,9 +20,11 @@ services:
       FLASK_APP: app.py
       FLASK_RUN_HOST: 0.0.0.0
       FLASK_RUN_PORT: 5555
-      FLASK_ENV: development
+      FLASK_DEBUG: False
+      FLASK_ENV: production
     networks:
       - default
+
 
 #  certbot:
 #    image: certbot/certbot:latest
