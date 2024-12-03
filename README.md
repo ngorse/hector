@@ -41,7 +41,7 @@ docker run -p 5555:5555 hector
 ### certificates
 
 ```bash
-docker compose -f services.yml run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d ulex.servehttp.com
+docker compose run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d ulex.servehttp.com
 ````
 
 ### Run
