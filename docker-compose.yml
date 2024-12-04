@@ -17,12 +17,14 @@ services:
     ports:
       - 5555:5555
     environment:
+      PYTHONUNBUFFERED: 1
       FLASK_APP: app.py
       FLASK_RUN_HOST: 0.0.0.0
       FLASK_RUN_PORT: 5555
       FLASK_DEBUG: False
       FLASK_ENV: production
-      PYTHONUNBUFFERED: 1
+      LLM_MODEL: llama3.2
+      CONTEXT_LENGTH: 500
     networks:
       - default
 

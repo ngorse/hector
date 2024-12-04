@@ -2,8 +2,10 @@ import os
 import json
 import logging
 import requests
-from datetime import datetime
-from flask import Flask, render_template, request, jsonify
+from datetime import timedelta
+from flask import Flask, render_template, request, jsonify, session, redirect
+
+CONTEXT_LENGTH=int(os.environ.get('CONTEXT_LENGTH', '500'))
 
 def set_logger():
     if bool(os.environ.get('FLASK_DEBUG', True)):
@@ -16,56 +18,74 @@ def set_logger():
     logger.addHandler(console_handler)
 
 def set_llm():
-    global LLM_URL
-    global LLM_MODEL
-    
-    LLM_URL = os.environ.get('LLM_PROTOCOL', 'http') + "://" + \
+    session['llm_url'] = os.environ.get('LLM_PROTOCOL', 'http') + "://" + \
             os.environ.get('LLM_HOST', 'localhost') + ":" +  \
-            os.environ.get('LLM_PORT', '11434') + "/api/chat"
-    LLM_MODEL= os.environ.get('LLM_MODEL', 'llama3.2')
-    logger.info(f'LLM_URL  : {LLM_URL}')
-    logger.info(f'LLM_MODEL: {LLM_MODEL}')
+            os.environ.get('LLM_PORT', '11434')
+    session['llm_url_chat'] = session['llm_url'] + "/api/chat"
+    session['llm_url_pull'] = session['llm_url'] + "/api/pull"
+    session['llm_model'] = os.environ.get('LLM_MODEL', 'llama3.2')
+
+    logger.info(f"LLM_URL  : {session['llm_url']}")
+    data = { "model": session['llm_model'] }
+    response = requests.post(session['llm_url_pull'], json=data)
+    if response.ok:
+        logger.info(f"LLM_MODEL: {session['llm_model']}")
+    else:
+        logger.info(f"LLM_MODEL: Pull failed ({response.status_code}): {response.text}")
 
 logger = logging.getLogger(__name__)
 set_logger()
 
-MESSAGES = []
-LLM_MODEL = ""
-LLM_URL = ""
-set_llm()
-
 # --------------------------------------------------------------
 
 app = Flask(__name__)
+app.secret_key = b'Y\xf1Xz\x00\xad|eQ\x80t \xca\x1a\x10K'
+app.permanent_session_lifetime = timedelta(days=30)
 
 @app.route("/")
-def home():    
+def home():
+    set_llm()
+    if 'context' not in session:
+        session['context'] = []
     return render_template("index.html")
+
+@app.route("/reset")
+def reset():
+    session['context'] = []
+    logger.info(f"IP    : {request.remote_addr}")
+    logger.info(f"ACTION: CONTEXT_RESET")
+    return redirect("/", code=302)
 
 @app.route("/chat", methods=["POST"])
 def get_bot_response():
-    userText = request.json.get('msg')
-    return get_answer(userText)
+    message = request.json.get('msg')
+    return get_answer(message=message)
 
 # --------------------------------------------------------------
 
-def get_answer(prompt, stream=False):
-    global MESSAGES
+def append_to_context(role, content):
+    if len(session['context']) >= CONTEXT_LENGTH:
+        context = session['context']
+        context = context[2:]
+        session['context'] = context
 
-    if len(MESSAGES) >= 200:
-        MESSAGES = MESSAGES[2:]
-    MESSAGES.append({ "role": "user", "content": prompt })
+    context = session['context']
+    context.append({ "role": role, "content": content })
+    session['context'] = context
+
+def get_answer(message, stream=False):
+    append_to_context(role="user", content=message)
     input = {
-        "model": LLM_MODEL,
-        "messages": MESSAGES,
+        "model": session['llm_model'] ,
+        "messages": session['context'],
         "stream": stream
     }
 
     try:
-        output = requests.post(LLM_URL, json=input)
+        output = requests.post(session['llm_url_chat'], json=input)
         response = json.loads(output.text)["message"]["content"]
         role = json.loads(output.text)["message"]["role"]
-        MESSAGES.append({ "role": role, "content:": response})
+        append_to_context(role=role, content=response)
     except json.JSONDecodeError as e:
         response = f"[SYSTEM ERROR]: Error decoding JSON: {e}"
     except KeyError as e:
@@ -75,9 +95,10 @@ def get_answer(prompt, stream=False):
     except Exception as e:
         response = f"[SYSTEM ERROR]: An unexpected error occurred: {e}"
 
-    logger.info(f'IP    : {request.remote_addr}')
-    logger.info(f"INPUT : {prompt}")
+    logger.info(f"IP    : {request.remote_addr}")
+    logger.info(f"INPUT : {message}")
     logger.info(f"OUTPUT: {response}")
+    logger.info(f"CTX   : {session['context']}")
 
     return jsonify({"response": response.replace("\n", "<br>")})
 

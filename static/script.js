@@ -14,13 +14,21 @@
             toggleWaitIndicators();
         }
 
+        function resetContext() {
+            toggleWaitIndicators();
+            fetch('/reset', {})
+            var botHtml = '<p class="botTextReset"><span>Oops, I have forgotten everything!</span></p>';
+            $("#chatbox").append(botHtml);
+            refreshText();
+        }
+
         function getBotResponse() {
             message = $("#textInput").val().trim();
             if (!message) {
                 return;
             }
 
-            var userHtml = '<p class="userText"><span>' + message + "</span></p>";
+            var userHtml = '<p class="userText"><span>' + message + '</span></p>';
             $("#textInput").val("");
             $("#chatbox").append(userHtml);
             refreshText();
@@ -34,7 +42,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                var botHtml = '<p class="botText"><span>' + data.response + "</span></p>";
+                var botHtml = '<p class="botText"><span>' + data.response + '</span></p>';
                 $("#chatbox").append(botHtml);
                 refreshText();
             })

@@ -23,6 +23,6 @@ ENV LLM_PROTOCOL=http
 ENV LLM_HOST=host.docker.internal
 ENV LLM_PORT=11434
 ENV LLM_MODEL=llama3.2
-
+ENV CONTEXT_LENGTH=500
 # Run the Flask application
 CMD ["flask", "run"]
