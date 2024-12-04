@@ -98,7 +98,6 @@ def get_answer(message, stream=False):
     logger.info(f"IP    : {request.remote_addr}")
     logger.info(f"INPUT : {message}")
     logger.info(f"OUTPUT: {response}")
-    logger.info(f"CTX   : {session['context']}")
 
     return jsonify({"response": response.replace("\n", "<br>")})
 
