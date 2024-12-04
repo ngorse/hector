@@ -61,11 +61,8 @@ def get_answer(prompt, stream=False):
         "stream": stream
     }
 
-    logger.info(f"\nDATE  : {datetime.now()}")
-    logger.info(f"INPUT : {MESSAGES[-1]}")
     try:
         output = requests.post(LLM_URL, json=input)
-        logger.info(f'IP: {request.remote_addr}')
         response = json.loads(output.text)["message"]["content"]
         role = json.loads(output.text)["message"]["role"]
         MESSAGES.append({ "role": role, "content:": response})
@@ -78,7 +75,10 @@ def get_answer(prompt, stream=False):
     except Exception as e:
         response = f"[SYSTEM ERROR]: An unexpected error occurred: {e}"
 
-    logger.info(f"OUTPUT: {MESSAGES[-1]}\n")
+    logger.info(f'IP    : {request.remote_addr}')
+    logger.info(f"INPUT : {prompt}")
+    logger.info(f"OUTPUT: {response}")
+
     return jsonify({"response": response.replace("\n", "<br>")})
 
 # --------------------------------------------------------------
