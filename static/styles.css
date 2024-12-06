@@ -64,7 +64,7 @@
         }
 
         .userText, .botText {
-            max-width: 70%;
+            max-width: 80%;
             margin-bottom: 10px;
             line-height: 1.5;
             font-size: 0.9rem;
